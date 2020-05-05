@@ -8,15 +8,26 @@ use Tests\TestCase;
 
 class PostControllerTest extends TestCase
 {
+
+    use RefreshDatabase; // vamos a modificar datos por ese motivo usaremos esta clase
+
     /**
      * A basic feature test example.
      *
      * @return void
      */
-    public function testExample()
+    public function test_store()
     {
-        $response = $this->get('/');
+        // usar para saber que error esta aconteciendo $this->withoutExceptionHandling();
 
-        $response->assertStatus(200);
+        $response = $this->json('POST', 'api/posts',[
+            'title' => 'post de prueba'
+        ]);
+
+        $response->assertJsonStructure(['id', 'title', 'created_at', 'updated_at'])
+            ->assertJson(['title' => 'post de prueba']) //doble comprobacion de lo ingresado
+            ->assertStatus(201); //OK crea el recurso
+
+        $this->assertDatabaseHas('posts', ['title' => 'post de prueba']);
     }
 }
